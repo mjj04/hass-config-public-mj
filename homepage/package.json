@@ -1,0 +1,19 @@
+{
+  "name": "family-homepage",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Self-hosted family dashboard for the house",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "node-ical": "0.27.3",
+    "yaml": "2.9.1"
+  }
+}

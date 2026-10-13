@@ -1,0 +1,146 @@
+# FAMILY HOMEPAGE
+# Edit this file and every screen updates within a second or two.
+# Everything not under pages:/people:/rooms: stays on the server, so it is
+# safe to put private calendar links here.
+
+title: Our House
+locale: en-GB              # date and time style
+timezone: Europe/London
+theme: auto                # auto (follow the device), dark or light
+idle_return: 120           # seconds before the tablet goes back to the first page (0 = never)
+
+# Everyone in the house. id is used by chores; photo is optional
+# (put images in config/assets/ and use /assets/name.jpg).
+people:
+  - { id: person1, name: Person 1, color: '#4f8cff' }
+  - { id: person2, name: Person 2, color: '#f2994a' }
+  - { id: person3, name: Person 3, color: '#27ae60' }
+
+# Rooms for chores and the floor plan.
+rooms:
+  - Sitting / Dining Room
+  - Kitchen
+  - Hall
+  - Garden
+  - Bedroom 1
+  - Bedroom 2
+  - Bedroom 3
+  - Bathroom
+  - Landing
+
+# Weather location (Open-Meteo, no key needed). Set to your house.
+weather:
+  latitude: 51.5074
+  longitude: -0.1278
+  units: metric            # metric or imperial
+
+# Calendars as ICS links. Google: Calendar settings > your calendar >
+# "Secret address in iCal format". Add person: <id> to colour by owner.
+calendars:
+  - name: Bank holidays
+    url: https://www.gov.uk/bank-holidays/england-and-wales.ics
+    color: '#9b8afb'
+  # - name: Family
+  #   url: https://calendar.google.com/calendar/ical/xxxx/private-xxxx/basic.ics
+  #   color: '#4f8cff'
+
+# Chores added the first time the app starts. After that, add, edit and
+# delete them on screen.
+chores:
+  - { title: Empty the dishwasher, room: Kitchen, repeat: daily }
+  - { title: Make your bed, person: person3, room: Bedroom 3, repeat: daily }
+  - { title: Hoover the sitting room, person: person1, room: Sitting / Dining Room, repeat: weekly }
+  - { title: Clean the bathroom, person: person2, room: Bathroom, repeat: weekly }
+  - { title: Put the bins out, room: Garden, repeat: weekly }
+  - { title: Mow the lawn, person: person1, room: Garden, repeat: weekly }
+
+# The server this runs on (192.168.86.27).
+server:
+  name: Home server
+  docker: http://docker-proxy:2375      # the read-only proxy in docker-compose.yml
+  # Disk meters. Defaults to the disk holding ./data. To add another disk,
+  # mount it into the container in docker-compose.yml and list it here:
+  # disks:
+  #   - { name: System, path: /app/data }
+  #   - { name: Media, path: /media }
+
+# PAGES
+# Each page is a 12-column grid, 8 rows tall on a landscape tablet.
+# w = columns wide (1-12), h = rows tall. Widgets are files in
+# public/widgets/ or your own in config/widgets/ (see README).
+
+pages:
+  - title: Home
+    icon: 🏠
+    widgets:
+      - { type: clock, w: 4, h: 3, bare: true }
+      - { type: weather, w: 4, h: 3, hours: 0, days: 5 }
+      - { type: people, title: Who's home, w: 4, h: 3 }
+      - { type: calendar, title: Coming up, w: 4, h: 5, days: 7 }
+      - { type: chores, title: Today's chores, w: 5, h: 5 }
+      - { type: list, title: Shopping, list: shopping, w: 3, h: 5 }
+
+  - title: Calendar
+    icon: 📅
+    widgets:
+      - { type: calendar, title: Next two weeks, w: 7, h: 8, days: 14 }
+      - { type: weather, w: 5, h: 3, hours: 6, days: 0 }
+      - { type: meals, title: Meals, w: 5, h: 5 }
+
+  - title: Chores
+    icon: 🧹
+    widgets:
+      - { type: chores, title: Chores, w: 12, h: 8 }
+
+  - title: Lists
+    icon: 📝
+    widgets:
+      - { type: list, title: Shopping, list: shopping, w: 4, h: 8 }
+      - { type: list, title: To do, list: todo, placeholder: Add a job…, w: 4, h: 4 }
+      - { type: meals, title: Meals this week, w: 4, h: 5, from: week }
+      - { type: note, title: Message board, w: 4, h: 4 }
+      - type: bins
+        title: Bins
+        w: 4
+        h: 3
+        # Set the next collection date for each bin and how often it comes.
+        bins:
+          - { name: Rubbish, color: '#6b7280', next: '2026-10-14', every: 14 }
+          - { name: Recycling, color: '#2563eb', next: '2026-10-21', every: 14 }
+          - { name: Garden waste, color: '#16a34a', next: '2026-10-21', every: 14 }
+
+  - title: House
+    icon: 🏡
+    widgets:
+      - type: floorplan
+        w: 12
+        h: 8
+        floors:
+          - name: Ground floor
+            image: /floorplans/ground.svg
+            rooms:
+              - { name: Garden, x: 50, y: 11.8 }
+              - { name: Sitting / Dining Room, x: 30.3, y: 41.9 }
+              - { name: Kitchen, x: 74.4, y: 36.8 }
+              - { name: Hall, x: 81.1, y: 90.4 }
+          - name: First floor
+            image: /floorplans/first.svg
+            rooms:
+              - { name: Bedroom 2, x: 30, y: 29.2 }
+              - { name: Bedroom 3, x: 75, y: 22.9 }
+              - { name: Landing, x: 78.6, y: 55.2 }
+              - { name: Bedroom 1, x: 33.3, y: 72.9 }
+              - { name: Bathroom, x: 78.6, y: 79.2 }
+
+  - title: Server
+    icon: 🖥️
+    widgets:
+      - { type: system, title: Server, w: 8, h: 8 }
+      - type: links
+        title: Links
+        w: 4
+        h: 8
+        items:
+          - { name: Router, url: 'http://192.168.86.1', icon: 📶 }
+          - { name: BBC Weather, url: 'https://www.bbc.co.uk/weather', icon: 🌦️ }
+          # - { name: Plex, url: 'http://192.168.86.27:32400/web', icon: 🎬 }

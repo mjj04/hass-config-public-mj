@@ -30,9 +30,13 @@ It uses my own [Metrology theme](https://github.com/Madelena/Metrology-for-Hass)
 - [Tools Used](#tools-used)
 - [Credits](#credits)
 
+## The Family Homepage (standalone)
+
+A self-hosted family dashboard that runs on its own in Docker, with no Home Assistant needed. It has calendars, chores, lists, meals, who's home, a floor plan of the house, server and Docker stats, and your own widgets. See [homepage/README.md](homepage/README.md).
+
 ## The Family Hub
 
-A wall-tablet dashboard for the whole household: calendar, chores, who's home, lists and meals, a floor plan of the house, and Docker/server stats. See [FAMILY-HUB.md](FAMILY-HUB.md) for setup.
+A Home Assistant version of the wall-tablet dashboard for the whole household: calendar, chores, who's home, lists and meals, a floor plan of the house, and Docker/server stats. See [FAMILY-HUB.md](FAMILY-HUB.md) for setup.
 
 ## The Maximalist Dashboard
 
