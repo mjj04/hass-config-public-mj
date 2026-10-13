@@ -218,7 +218,9 @@ test('custom widgets from config/widgets', async () => {
 
 test('static files stay inside their folders', async () => {
   assert.equal((await fetch(`${base}/`)).status, 200);
-  for (const p of ['/../server.js', '/%2e%2e/server.js', '/widgets/..%2f..%2fserver.js', '/assets/../homepage.yaml']) {
+  assert.equal((await fetch(`${base}/vendor/three/build/three.module.js`)).status, 200);
+  for (const p of ['/../server.js', '/%2e%2e/server.js', '/widgets/..%2f..%2fserver.js', '/assets/../homepage.yaml',
+    '/vendor/three/package.json', '/vendor/three/build/..%2f..%2f..%2fserver.js']) {
     const res = await fetch(base + p);
     assert.equal(res.status, 404, p);
   }

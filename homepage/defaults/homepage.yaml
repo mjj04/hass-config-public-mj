@@ -1,7 +1,7 @@
 # FAMILY HOMEPAGE
 # Edit this file and every screen updates within a second or two.
 # Everything not under pages:/people:/rooms: stays on the server, so it is
-# safe to put private calendar links here.
+# safe to put private calendar links, device addresses and keys here.
 
 title: Our House
 locale: en-GB              # date and time style
@@ -16,17 +16,90 @@ people:
   - { id: person2, name: Person 2, color: '#f2994a' }
   - { id: person3, name: Person 3, color: '#27ae60' }
 
-# Rooms for chores and the floor plan.
+# Rooms. id matches the room shapes in the house plans (room_<id>) and the
+# 3D model; short is the label on the plan.
 rooms:
-  - Sitting / Dining Room
-  - Kitchen
-  - Hall
-  - Garden
-  - Bedroom 1
-  - Bedroom 2
-  - Bedroom 3
-  - Bathroom
-  - Landing
+  - { id: living_dining, name: Sitting / Dining Room, short: Living }
+  - { id: kitchen, name: Kitchen }
+  - { id: hall, name: Hall }
+  - { id: store, name: Under-stairs store, short: Store }
+  - { id: landing, name: Landing }
+  - { id: bedroom_1, name: Bedroom 1, short: Bed 1 }
+  - { id: bedroom_2, name: Bedroom 2, short: Bed 2 }
+  - { id: bedroom_3, name: Bedroom 3, short: Bed 3 }
+  - { id: bathroom, name: Bathroom, short: Bath }
+  - { id: garden, name: Garden }
+
+# SMART DEVICES
+# Each device has a name, a room, a type (light, switch, fan, sensor,
+# climate, cover) and a connection under via:. The ones below are
+# "virtual" (they only exist on screen) so you can try everything out.
+# Swap via: for your real devices, for example:
+#   via: { zigbee2mqtt: Kitchen ceiling }        Zigbee2MQTT friendly name
+#   via: { tasmota: tasmota_kettle }             Tasmota MQTT topic
+#   via: { shelly: 192.168.86.50, channel: 0 }   Shelly Gen2+ (add gen: 1 for older)
+#   via: { hue: 3 }                              Hue light id (group: true for a room)
+#   via: { wled: 192.168.86.60 }                 WLED strip
+#   via: { http: { on: <url>, off: <url>, state: { url: <url>, on: path.to.value } } }
+#   via: { adapter: myplug }                     your own config/devices/myplug.js
+# See the README for every option.
+
+# mqtt:                                  # for zigbee2mqtt, tasmota and mqtt devices
+#   url: mqtt://192.168.86.27:1883
+#   username: homepage
+#   password: secret
+# hue:                                   # Philips Hue bridge
+#   bridge: 192.168.86.x
+#   key: your-app-key
+
+devices:
+  - { name: Ceiling light, room: living_dining, type: light, via: virtual }
+  - { name: Floor lamp, room: living_dining, type: light, via: virtual }
+  - { name: TV, room: living_dining, type: switch, icon: 📺, via: virtual }
+  - { name: Heating, room: living_dining, type: climate, via: virtual, state: { temperature: 19.5, target: 20 } }
+  - { name: Kitchen lights, room: kitchen, type: light, dimmable: false, via: virtual }
+  - { name: Under-cabinet lights, room: kitchen, type: light, via: virtual }
+  - { name: Kettle, room: kitchen, type: switch, icon: ☕, via: virtual }
+  - { name: Kitchen sensor, room: kitchen, type: sensor, via: virtual, state: { temperature: 20.8, humidity: 58 } }
+  - { name: Hall light, room: hall, type: light, dimmable: false, via: virtual }
+  - { name: Landing light, room: landing, type: light, via: virtual }
+  - { name: Ceiling light, id: bedroom_1_light, room: bedroom_1, type: light, via: virtual }
+  - { name: Bedside lamp, room: bedroom_1, type: light, via: virtual }
+  - { name: Blind, room: bedroom_1, type: cover, via: virtual }
+  - { name: Bedroom 1 sensor, room: bedroom_1, type: sensor, via: virtual, state: { temperature: 18.9, humidity: 52 } }
+  - { name: Ceiling light, id: bedroom_2_light, room: bedroom_2, type: light, via: virtual }
+  - { name: Bedroom 2 sensor, room: bedroom_2, type: sensor, via: virtual, state: { temperature: 19.2 } }
+  - { name: Ceiling light, id: bedroom_3_light, room: bedroom_3, type: light, via: virtual }
+  - { name: Night light, room: bedroom_3, type: light, via: virtual, state: { brightness: 20 } }
+  - { name: Bathroom light, room: bathroom, type: light, dimmable: false, via: virtual }
+  - { name: Extractor fan, room: bathroom, type: fan, via: virtual }
+  - { name: Bathroom sensor, room: bathroom, type: sensor, via: virtual, state: { temperature: 21.4, humidity: 71 } }
+  - { name: Garden lights, room: garden, type: switch, icon: 🌳, via: virtual }
+
+# One-tap scenes. Each action targets a device, a room (optionally one
+# type), or all devices of a type (* = everything with all_off).
+# set: on, off, toggle, or { on, brightness, target, position, command }.
+# "All off" is always there.
+scenes:
+  - name: Morning
+    icon: ☀️
+    actions:
+      - { device: kitchen_lights, set: on }
+      - { device: under_cabinet_lights, set: { brightness: 80 } }
+      - { device: heating, set: { target: 20 } }
+  - name: Film night
+    icon: 🎬
+    actions:
+      - { room: living_dining, type: light, set: off }
+      - { device: floor_lamp, set: { brightness: 25 } }
+      - { device: tv, set: on }
+  - name: Bedtime
+    icon: 🌙
+    actions:
+      - { all: '*', set: off }
+      - { device: landing_light, set: { brightness: 15 } }
+      - { device: night_light, set: { brightness: 20 } }
+      - { device: heating, set: { target: 17 } }
 
 # Weather location (Open-Meteo, no key needed). Set to your house.
 weather:
@@ -112,25 +185,15 @@ pages:
   - title: House
     icon: 🏡
     widgets:
-      - type: floorplan
+      # Your house plans and 3D model. Replace the files in config/assets/
+      # and point these at /assets/... to use new exports.
+      - type: house
         w: 12
         h: 8
         floors:
-          - name: Ground floor
-            image: /floorplans/ground.svg
-            rooms:
-              - { name: Garden, x: 50, y: 11.8 }
-              - { name: Sitting / Dining Room, x: 30.3, y: 41.9 }
-              - { name: Kitchen, x: 74.4, y: 36.8 }
-              - { name: Hall, x: 81.1, y: 90.4 }
-          - name: First floor
-            image: /floorplans/first.svg
-            rooms:
-              - { name: Bedroom 2, x: 30, y: 29.2 }
-              - { name: Bedroom 3, x: 75, y: 22.9 }
-              - { name: Landing, x: 78.6, y: 55.2 }
-              - { name: Bedroom 1, x: 33.3, y: 72.9 }
-              - { name: Bathroom, x: 78.6, y: 79.2 }
+          - { name: Ground floor, plan: /house/ground.svg }
+          - { name: First floor, plan: /house/first.svg }
+        model: { name: 3D, obj: /house/house.obj, mtl: /house/house.mtl }
 
   - title: Server
     icon: 🖥️

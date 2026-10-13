@@ -47,7 +47,11 @@ function normalise(c) {
       ...w,
     })),
   }));
-  c.rooms ??= [];
+  // Rooms are { id, name }. Plain names get an id like "bedroom_1",
+  // which is also how rooms are named in the house plans and 3D model.
+  c.rooms = (c.rooms || []).map((r) => (typeof r === 'string'
+    ? { id: roomId(r), name: r }
+    : { ...r, id: r.id || roomId(r.name), name: r.name || r.id }));
   c.calendars ??= [];
   c.server ??= {};
   return c;
@@ -73,6 +77,18 @@ export function watchConfig(file, onChange) {
       }
     }, 200);
   });
+}
+
+// Finds a room by id or name; unknown rooms keep a slug of what was given.
+export function resolveRoom(config, value) {
+  if (value == null || value === '') return null;
+  const v = String(value);
+  const room = config.rooms.find((r) => r.id === v || r.name.toLowerCase() === v.toLowerCase());
+  return room ? room.id : roomId(v);
+}
+
+function roomId(s) {
+  return slug(s).replace(/-/g, '_');
 }
 
 export function slug(s) {

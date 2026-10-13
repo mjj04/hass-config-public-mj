@@ -1,6 +1,6 @@
 # Family Homepage
 
-A self-hosted dashboard for the house: clock, weather, calendars, who's home, chores, shopping and to-do lists, meal plan, message board, bin days, a floor plan of the house, and server/Docker stats. It runs on its own (no Home Assistant), every screen updates live, and you can add any widget you like.
+A self-hosted dashboard for the house: clock, weather, calendars, who's home, chores, shopping and to-do lists, meal plan, message board, bin days, an interactive plan and 3D model of the house with smart-device controls and scenes, and server/Docker stats. It runs on its own (no Home Assistant), every screen updates live, and you can add any widget or device connection you like.
 
 ![Home page on a landscape tablet](docs/home.png)
 
@@ -34,7 +34,8 @@ Everything is in `config/homepage.yaml`:
 | Section | What to set |
 |---|---|
 | `people` | Your family. `id` links chores to a person. `photo: /assets/name.jpg` uses a picture from `config/assets/`. |
-| `rooms` | Room names for chores and the floor plan. |
+| `rooms` | `{ id, name, short }`. `id` matches the room shapes in the house plans and model (`room_<id>`). |
+| `devices`, `scenes` | Smart devices and one-tap scenes. See [Smart devices](#smart-devices). |
 | `weather` | Latitude and longitude of the house. |
 | `calendars` | ICS links. For Google: Calendar settings > your calendar > *Secret address in iCal format*. UK bank holidays are already included. |
 | `server` | Name and Docker connection for the Server page. |
@@ -54,13 +55,109 @@ Each page is a 12-column grid that is 8 rows tall on a landscape tablet. Every w
 | `list` | `list` (any id: `shopping`, `todo`, `packing`…), `placeholder` |
 | `meals` | `days`, `from` (`today` or `week`) |
 | `note` | `note` (id), a shared message board |
-| `floorplan` | `floors` with an image and room positions; badges show chores left per room |
+| `house` | `floors` of `{ name, plan }`, `model` of `{ obj, mtl, camera }`, `view`. See [The house](#the-house). |
+| `devices` | `room`, `types`. Device controls grouped by room. |
+| `scenes` | `scenes` (ids to show). Big scene buttons, plus All off. |
 | `system` | `show` (`host`, `docker`), `stopped` |
 | `links` | `items` of `{ name, url, icon }` |
 | `iframe` | `url`, `refresh` (seconds) |
 | `bins` | `bins` of `{ name, color, next, every }`. This is the example custom widget in `config/widgets/bins.js`. |
 
-![House page](docs/house.png)
+## The house
+
+The House page shows your plans. Tap a room, on the plan or its label, to get its devices, temperature and chores in the side panel. Rooms with a light on glow, and the labels show the temperature and how many chores are left. **3D** opens the model: drag to turn it and tap a floor to pick that room.
+
+![House page, room selected](docs/house.png)
+
+The plans are SVGs whose room shapes have `id="room_<room id>"`. Your exports already do this, for example `room_kitchen` and `room_bedroom_1`. Any picture works under the shapes. The 3D model is an OBJ (+ MTL) whose floor meshes are named `room_<id>`. To use new exports, put them in `config/assets/` and point the widget at `/assets/...`:
+
+```yaml
+      - type: house
+        floors:
+          - { name: Ground floor, plan: /assets/ground.svg }
+          - { name: First floor, plan: /assets/first.svg }
+        model: { obj: /assets/house.obj, mtl: /assets/house.mtl, camera: [-1, 1.6, 1.1] }
+```
+
+![3D view](docs/house-3d.png)
+
+## Smart devices
+
+Each device in `devices:` has a `name`, a `room` (id or name), a `type` and a connection under `via:`. The `id` defaults to the name in snake case (`Floor lamp` becomes `floor_lamp`).
+
+| type | Controls |
+|---|---|
+| `light` | On/off and brightness (`dimmable: false` hides the slider) |
+| `switch`, `fan` | On/off, plus power use if reported |
+| `climate` | Current temperature and a target you can nudge |
+| `cover` | Open, stop, close |
+| `sensor` | Temperature, humidity, power, battery |
+
+| via | Works with | Example |
+|---|---|---|
+| `virtual` | Nothing physical: the state lives in the homepage. Handy for trying things out. | `via: virtual` |
+| `zigbee2mqtt` | Any Zigbee device paired to Zigbee2MQTT (IKEA, Aqara, Hue bulbs without the bridge, TRVs…) | `via: { zigbee2mqtt: Kitchen ceiling }` |
+| `tasmota` | Sonoff and other Tasmota plugs and switches | `via: { tasmota: sonoff_kettle }` |
+| `mqtt` | Anything else on MQTT, including ESPHome | `via: { mqtt: { state_topic, command_topic, payload_on, payload_off } }` |
+| `shelly` | Shelly relays and dimmers over local HTTP | `via: { shelly: 192.168.86.50, channel: 0 }` (`gen: 1` for older ones) |
+| `hue` | Philips Hue bridge | `via: { hue: 3 }`, or `{ hue: 1, group: true }` for a Hue room |
+| `wled` | WLED LED strips | `via: { wled: 192.168.86.60 }` |
+| `http` | Any device with a web API | see below |
+| `adapter` | Your own code in `config/devices/<name>.js` | `via: { adapter: myplug }` |
+
+MQTT connections need the broker at the top level:
+
+```yaml
+mqtt:
+  url: mqtt://192.168.86.27:1883
+  username: homepage
+  password: secret
+  # zigbee2mqtt_base: zigbee2mqtt
+hue:
+  bridge: 192.168.86.x
+  key: your-app-key     # press the bridge button, then POST {"devicetype":"homepage"} to http://<bridge>/api
+devices_poll: 10        # seconds between checks of HTTP-based devices
+```
+
+A generic `http` device sends a request for each action. `{{value}}` is replaced by the brightness or target, and `state` paths are read from the JSON reply:
+
+```yaml
+  - name: Dehumidifier
+    room: bathroom
+    via:
+      http:
+        on: http://192.168.86.70/on
+        off: { url: 'http://192.168.86.70/api', method: POST, body: { power: false } }
+        state: { url: 'http://192.168.86.70/status', on: relay.ison, power: meters.0.power }
+```
+
+Your own connection, `config/devices/myplug.js`, returns an object with any of `read()`, `subscribe(push)`, `set(changes)` and `stop()`:
+
+```js
+export function create(device, via, { fetchJson, config }) {
+  return {
+    read: async () => ({ on: (await fetchJson(`http://${via.host}/state`)).on }),
+    set: async ({ on, brightness }) => fetchJson(`http://${via.host}/set?on=${on}&level=${brightness ?? ''}`),
+  };
+}
+```
+
+States use `on`, `brightness` (0–100), `temperature`, `humidity`, `target`, `position` (0–100), `power` (W) and `battery` (%).
+
+### Scenes
+
+```yaml
+scenes:
+  - name: Bedtime
+    icon: 🌙
+    actions:
+      - { all: '*', set: off }                         # everything with all_off
+      - { room: living_dining, type: light, set: off }
+      - { device: landing_light, set: { brightness: 15 } }
+      - { device: heating, set: { target: 17 } }
+```
+
+Actions run together, and a later action for the same device wins. In the example, the landing light ends up on at 15%. **All off** is always available. A device with `all_off: false` (a fridge plug, say) is left alone by All off and by a room's All off button.
 
 ## Add your own widget
 
@@ -115,11 +212,11 @@ Only `title`, `locale`, `timezone`, `theme`, `idle_return`, `people`, `rooms` an
 
 ## Data and backups
 
-Lists, chores, meals, notes and who's home are saved in `data/db.json`. Back up `config/` and `data/`.
+Lists, chores, meals, notes, who's home and virtual device states are saved in `data/db.json`. Back up `config/` and `data/`.
 
 ## Security
 
-There is no login: anyone on your network can open the page and change the lists. Don't forward port 8080 on your router. For access from outside, use a VPN such as Tailscale or WireGuard.
+There is no login: anyone on your network can open the page, change the lists and switch devices. Don't forward port 8080 on your router. For access from outside, use a VPN such as Tailscale or WireGuard.
 
 The Server page reads Docker through `docker-socket-proxy`, which only allows read-only container requests. The homepage never gets the Docker socket itself.
 
@@ -127,6 +224,6 @@ The Server page reads Docker through `docker-socket-proxy`, which only allows re
 
 ```bash
 npm ci
-npm test     # starts the server against a temp config, a fake Docker API and a local .ics file
+npm test     # real server against temp configs, fake Docker/HTTP/Shelly/Hue/WLED devices and an MQTT broker
 npm start    # http://localhost:8080
 ```

@@ -13,7 +13,7 @@ export function choreForm(ctx, chore = {}) {
     people.map((p) => h('option', { value: p.id, selected: chore.person === p.id }, p.name)));
   const room = h('select', { class: 'field', name: 'room' },
     h('option', { value: '' }, 'No room'),
-    config.rooms.map((r) => h('option', { value: r, selected: chore.room === r }, r)));
+    config.rooms.map((r) => h('option', { value: r.id, selected: chore.room === r.id || chore.room === r.name }, r.name)));
   const repeat = h('select', { class: 'field', name: 'repeat' },
     Object.entries(REPEAT_TEXT).map(([v, t]) => h('option', { value: v, selected: (chore.repeat || 'daily') === v }, t)));
   const form = h('form', { onSubmit: (e) => e.preventDefault() }, title, person, room, repeat);
@@ -48,7 +48,8 @@ export function choreRow(ctx, c, after) {
     await api(`/api/chores/${c.id}/done`, { method: 'POST', body: { done: !c.done } });
     after?.();
   };
-  const sub = [c.room, c.repeat !== 'daily' && REPEAT_TEXT[c.repeat]].filter(Boolean).join(' · ');
+  const roomName = c.room ? ctx.room(c.room)?.name || c.room : null;
+  const sub = [roomName, c.repeat !== 'daily' && REPEAT_TEXT[c.repeat]].filter(Boolean).join(' · ');
   const by = c.done && c.doneBy && c.doneBy !== c.person ? person(c.doneBy)?.name : null;
   return h('div', { class: `row${c.done ? ' done' : ''}` },
     h('button', { type: 'button', class: `check${c.done ? ' on' : ''}`, 'aria-label': `${c.title}: ${c.done ? 'done' : 'not done'}`, onClick: toggle }),
@@ -73,7 +74,10 @@ export default function chores(el, opts, ctx) {
   async function load() {
     try {
       let { chores: list } = await api('/api/chores');
-      if (opts.room) list = list.filter((c) => c.room === opts.room);
+      if (opts.room) {
+        const want = ctx.room(opts.room)?.id || opts.room;
+        list = list.filter((c) => (ctx.room(c.room)?.id || c.room) === want);
+      }
       const columns = [
         ...people.map((p) => ({ id: p.id, name: p.name, color: p.color })),
         ...(opts.anyone === false ? [] : [{ id: null, name: 'Anyone', color: 'var(--muted)' }]),

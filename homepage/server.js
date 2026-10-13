@@ -29,6 +29,7 @@ function emit(topic) {
 
 watchConfig(configFile, (next) => {
   config = next;
+  for (const { mod } of lifecycle) mod.configChanged?.(next);
   emit('config');
 });
 
@@ -39,6 +40,7 @@ class HttpError extends Error {
 }
 
 const routes = [];
+const lifecycle = []; // modules with start/configChanged/stop
 function addRoutes(table, source) {
   for (const [key, handler] of Object.entries(table)) {
     const [method, pattern] = key.split(' ');
@@ -70,6 +72,7 @@ async function loadWidgetModules(dir, filter) {
     try {
       const mod = await import(pathToFileURL(path.join(dir, f)).href);
       if (mod.routes) addRoutes(mod.routes, f);
+      if (mod.start || mod.configChanged || mod.stop) lifecycle.push({ name: f, mod });
     } catch (err) {
       console.error(`Widget ${f} failed to load: ${err.message}`);
     }
@@ -77,6 +80,13 @@ async function loadWidgetModules(dir, filter) {
 }
 await loadWidgetModules(path.join(ROOT, 'server'), (f) => f.endsWith('.js'));
 await loadWidgetModules(path.join(CONFIG_DIR, 'widgets'), (f) => f.endsWith('.server.js'));
+for (const { name, mod } of lifecycle) {
+  try {
+    await mod.start?.({ store, emit, configDir: CONFIG_DIR, config });
+  } catch (err) {
+    console.error(`${name} failed to start: ${err.message}`);
+  }
+}
 
 async function readBody(req) {
   let size = 0;
@@ -134,8 +144,11 @@ const TYPES = {
   '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml',
   '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp',
   '.gif': 'image/gif', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json',
-  '.woff2': 'font/woff2',
+  '.woff2': 'font/woff2', '.obj': 'text/plain; charset=utf-8', '.mtl': 'text/plain; charset=utf-8',
 };
+
+// three.js for the 3D house, served from node_modules.
+const THREE_DIR = path.join(ROOT, 'node_modules', 'three');
 
 // Resolves a URL path inside a base folder, refusing anything that
 // escapes it.
@@ -151,7 +164,11 @@ async function serveStatic(res, pathname) {
     // Your own widgets in config/widgets win over the built-in ones.
     candidates.push(within(path.join(CONFIG_DIR, 'widgets'), pathname.slice('/widgets/'.length)));
   }
-  if (pathname.startsWith('/assets/')) {
+  if (pathname.startsWith('/vendor/three/')) {
+    const rel = pathname.slice('/vendor/three/'.length);
+    if (!/^(build|examples\/jsm)\//.test(rel)) return notFound(res);
+    candidates.push(within(THREE_DIR, rel));
+  } else if (pathname.startsWith('/assets/')) {
     candidates.push(within(path.join(CONFIG_DIR, 'assets'), pathname.slice('/assets/'.length)));
   } else {
     candidates.push(within(PUBLIC_DIR, pathname === '/' ? 'index.html' : pathname.slice(1)));
@@ -193,6 +210,7 @@ server.listen(PORT, () => {
 for (const sig of ['SIGINT', 'SIGTERM']) {
   process.on(sig, () => {
     for (const res of clients) res.end();
+    for (const { mod } of lifecycle) { try { mod.stop?.(); } catch { /* exiting */ } }
     server.close(() => process.exit(0));
     setTimeout(() => process.exit(0), 2000).unref();
   });

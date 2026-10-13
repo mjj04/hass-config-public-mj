@@ -105,15 +105,27 @@ function dialog({ title, body, actions = [{ label: 'Close' }] }) {
   return dlg;
 }
 
+// Short message at the bottom of the screen.
+function toast(message, { error = false } = {}) {
+  const t = h('div', { class: `toast${error ? ' error' : ''}`, role: 'status' }, message);
+  document.body.append(t);
+  setTimeout(() => t.classList.add('out'), 3000);
+  setTimeout(() => t.remove(), 3400);
+}
+
 function makeCtx(card, widget) {
   const timers = [];
   const subs = [];
+  const cleanups = [];
   const fmt = makeFmt();
   const ctx = {
-    h, api, fmt, dialog,
+    h, api, fmt, dialog, toast,
     config,
     people: config.people,
     person: (id) => config.people.find((p) => p.id === id),
+    rooms: config.rooms,
+    // A room by id or name.
+    room: (v) => config.rooms.find((r) => r.id === v || r.name === v),
     widget,
     // Run fn every ms while the page is open.
     every(ms, fn) { timers.push(setInterval(fn, ms)); },
@@ -130,8 +142,11 @@ function makeCtx(card, widget) {
       return btn;
     },
     setTitle(text) { const t = card.querySelector('h2'); if (t) t.textContent = text; },
+    // Run fn when the page changes (free WebGL, observers, ...).
+    onDestroy(fn) { cleanups.push(fn); },
     destroy() {
       timers.forEach(clearInterval);
+      cleanups.forEach((fn) => { try { fn(); } catch (err) { console.error(err); } });
       for (const [topic, fn] of subs) listeners.get(topic)?.delete(fn);
     },
   };

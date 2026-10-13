@@ -7,6 +7,7 @@
 // `chores:` in homepage.yaml are added; after that, manage them on screen.
 
 import { randomUUID } from 'node:crypto';
+import { resolveRoom } from '../lib/config.js';
 import { dayKey, weekKey } from '../lib/time.js';
 
 const KEY = 'chores';
@@ -20,7 +21,8 @@ export function isDone(chore, now, tz) {
   return true;
 }
 
-function clean(body, people, fail, partial = false) {
+function clean(body, config, fail, partial = false) {
+  const { people } = config;
   const out = {};
   if (!partial || 'title' in body) {
     out.title = String(body.title ?? '').trim().slice(0, 120);
@@ -30,7 +32,7 @@ function clean(body, people, fail, partial = false) {
     out.person = body.person || null;
     if (out.person && !people.some((p) => p.id === out.person)) fail(400, `Unknown person ${out.person}`);
   }
-  if (!partial || 'room' in body) out.room = body.room ? String(body.room).slice(0, 60) : null;
+  if (!partial || 'room' in body) out.room = body.room ? resolveRoom(config, String(body.room).slice(0, 60)) : null;
   if (!partial || 'repeat' in body) {
     out.repeat = body.repeat || 'daily';
     if (!REPEATS.includes(out.repeat)) fail(400, `Repeat must be one of ${REPEATS.join(', ')}`);
@@ -44,7 +46,7 @@ async function seeded(store, config) {
   const initial = [];
   for (const c of config.chores || []) {
     try {
-      initial.push({ id: randomUUID(), ...clean(c, config.people, fail), doneAt: null });
+      initial.push({ id: randomUUID(), ...clean(c, config, fail), doneAt: null });
     } catch (err) {
       console.error(`Skipped chore "${c.title}" from config: ${err.message}`);
     }
@@ -65,14 +67,14 @@ export const routes = {
   },
 
   'POST /api/chores': async ({ store, config, body, emit, fail }) => {
-    const chore = { id: randomUUID(), ...clean(body, config.people, fail), doneAt: null };
+    const chore = { id: randomUUID(), ...clean(body, config, fail), doneAt: null };
     await store.update(KEY, [], (list) => [...list, chore]);
     emit('chores');
     return chore;
   },
 
   'PATCH /api/chores/:id': async ({ store, config, params, body, emit, fail }) => {
-    const changes = clean(body, config.people, fail, true);
+    const changes = clean(body, config, fail, true);
     let found = false;
     await store.update(KEY, [], (list) => list.map((c) => {
       if (c.id !== params.id) return c;
