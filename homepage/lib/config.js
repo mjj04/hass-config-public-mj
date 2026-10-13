@@ -40,7 +40,7 @@ function normalise(c) {
   c.pages = (c.pages || []).map((page, i) => ({
     id: page.id || slug(page.title) || `page${i + 1}`,
     ...page,
-    widgets: (page.widgets || []).map((w, j) => ({
+    widgets: (page.widgets || []).map(upgradeWidget).map((w, j) => ({
       id: w.id || `${page.id || slug(page.title) || i}-${w.type}-${j}`,
       w: 4,
       h: 3,
@@ -55,6 +55,24 @@ function normalise(c) {
   c.calendars ??= [];
   c.server ??= {};
   return c;
+}
+
+// The first version had a "floorplan" widget, which the "house" widget
+// (plans plus the 3D model) replaced. Configs copied from that version
+// still name it, so show the bundled house instead of a missing widget.
+function upgradeWidget(w) {
+  if (w?.type !== 'floorplan') return w;
+  console.log('homepage.yaml: "type: floorplan" is now "type: house"; showing the bundled plans and 3D model');
+  const { floors: _old, ...rest } = w;
+  return {
+    ...rest,
+    type: 'house',
+    floors: [
+      { name: 'Ground floor', plan: '/house/ground.svg' },
+      { name: 'First floor', plan: '/house/first.svg' },
+    ],
+    model: { name: '3D', obj: '/house/house.obj', mtl: '/house/house.mtl' },
+  };
 }
 
 export function publicConfig(c) {
