@@ -1,0 +1,137 @@
+# FAMILY HUB
+# Chores View
+# Left: a checklist for each person. Right: recurring house chores
+# using the chore_row template and groups from the original config.
+
+title: Chores
+icon: 'mdi:broom'
+path: chores
+
+type: 'custom:grid-layout'
+layout:
+  margin: 0
+  card_margin: 8px
+  grid-template-columns: 1.6fr 1fr
+  grid-template-areas: |
+    "nav nav"
+    "people house"
+  mediaquery:
+    '(max-width: 1023.99px)':
+      grid-template-columns: 1fr
+      grid-template-areas: |
+        "nav"
+        "people"
+        "house"
+
+cards:
+
+  - !include ../../shared/snippets/family-nav.yaml
+
+
+  # Per-person chores
+  # One todo-list card for every todo.chores_* entity, e.g.
+  # a Local To-do list named "Chores Alex" becomes todo.chores_alex.
+
+  - type: 'custom:auto-entities'
+    view_layout:
+      grid-area: people
+    show_empty: true
+    card:
+      type: 'custom:layout-card'
+      layout_type: 'custom:grid-layout'
+      layout:
+        margin: 0
+        card_margin: 0
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))
+        grid-gap: 8px
+    card_param: cards
+    sort:
+      method: entity_id
+    filter:
+      include:
+        - entity_id: todo.chores_*
+          options:
+            type: todo-list
+    else:
+      type: markdown
+      content: >-
+        No chore lists yet. Create a Local To-do list per person named
+        "Chores <name>" so it shows up as `todo.chores_<name>`.
+
+
+  # Recurring house chores
+  # Reuses the groups in config/groups/chores.yaml. The personal
+  # group is left out on purpose.
+
+  - type: vertical-stack
+    view_layout:
+      grid-area: house
+    cards:
+      - type: 'custom:button-card'
+        template: family_title
+        name: House
+      - type: 'custom:auto-entities'
+        filter:
+          include:
+            - group: group.chore_kitchen
+              options:
+                type: 'custom:button-card'
+                template: chore_row
+        card:
+          type: entities
+          title: Kitchen
+          card_mod:
+            style: |
+              #states > div > * {overflow: visible !important;}
+      - type: 'custom:auto-entities'
+        filter:
+          include:
+            - group: group.chore_bathroom
+              options:
+                type: 'custom:button-card'
+                template: chore_row
+        card:
+          type: entities
+          title: Bathroom
+          card_mod:
+            style: |
+              #states > div > * {overflow: visible !important;}
+      - type: 'custom:auto-entities'
+        filter:
+          include:
+            - group: group.chore_living_room
+              options:
+                type: 'custom:button-card'
+                template: chore_row
+        card:
+          type: entities
+          title: Sitting / Dining Room
+          card_mod:
+            style: |
+              #states > div > * {overflow: visible !important;}
+      - type: 'custom:auto-entities'
+        filter:
+          include:
+            - group: group.chore_plants
+              options:
+                type: 'custom:button-card'
+                template: chore_row
+        card:
+          type: entities
+          title: Plants
+          card_mod:
+            style: |
+              #states > div > * {overflow: visible !important;}
+      - type: 'custom:auto-entities'
+        filter:
+          include:
+            - group: group.chore_car
+              options:
+                type: 'custom:button-card'
+                template: chore_row
+        card:
+          type: entities
+          title: Car
+          card_mod:
+            style: |
+              #states > div > * {overflow: visible !important;}

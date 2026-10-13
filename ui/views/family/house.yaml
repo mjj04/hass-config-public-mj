@@ -1,0 +1,196 @@
+# FAMILY HUB
+# House View
+# Schematic floor plans of the house (www/family/floor-*.svg) with a
+# light toggle and temperature for each room. Tap a light to toggle it,
+# hold for more info. The entity ids below are placeholders: see the
+# table in FAMILY-HUB.md, and delete any element you do not need.
+
+title: House
+icon: 'mdi:home-floor-g'
+path: house
+
+type: 'custom:grid-layout'
+layout:
+  margin: 0
+  card_margin: 8px
+  grid-template-columns: 1fr 1fr
+  grid-template-areas: |
+    "nav nav"
+    "ground first"
+  mediaquery:
+    '(max-width: 1023.99px)':
+      grid-template-columns: 1fr
+      grid-template-areas: |
+        "nav"
+        "ground"
+        "first"
+
+cards:
+
+  - !include ../../shared/snippets/family-nav.yaml
+
+
+  # Ground floor
+
+  - type: picture-elements
+    view_layout:
+      grid-area: ground
+    title: Ground floor
+    image: /local/family/floor-ground.svg
+    elements:
+      - type: state-icon
+        entity: light.garden
+        title: Garden
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+        style:
+          left: 75.0%
+          top: 8.8%
+          '--mdc-icon-size': 36px
+      - type: state-icon
+        entity: light.sitting_dining
+        title: Sitting / Dining
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+        style:
+          left: 19.4%
+          top: 61.8%
+          '--mdc-icon-size': 36px
+      - type: state-label
+        entity: sensor.sitting_dining_temperature
+        style:
+          left: 41.7%
+          top: 61.8%
+          font-size: 18px
+          font-weight: 600
+          color: var(--primary-text-color)
+      - type: state-icon
+        entity: light.kitchen
+        title: Kitchen
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+        style:
+          left: 66.1%
+          top: 47.1%
+          '--mdc-icon-size': 36px
+      - type: state-label
+        entity: sensor.kitchen_temperature
+        style:
+          left: 82.8%
+          top: 47.1%
+          font-size: 18px
+          font-weight: 600
+          color: var(--primary-text-color)
+      - type: state-icon
+        entity: light.hall
+        title: Hall
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+        style:
+          left: 81.1%
+          top: 90.4%
+          '--mdc-icon-size': 36px
+
+  # First floor
+
+  - type: picture-elements
+    view_layout:
+      grid-area: first
+    title: First floor
+    image: /local/family/floor-first.svg
+    elements:
+      - type: state-icon
+        entity: light.bedroom_2
+        title: Bedroom 2
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+        style:
+          left: 19.4%
+          top: 35.4%
+          '--mdc-icon-size': 36px
+      - type: state-label
+        entity: sensor.bedroom_2_temperature
+        style:
+          left: 40.6%
+          top: 35.4%
+          font-size: 18px
+          font-weight: 600
+          color: var(--primary-text-color)
+      - type: state-icon
+        entity: light.bedroom_3
+        title: Bedroom 3
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+        style:
+          left: 68.1%
+          top: 26.0%
+          '--mdc-icon-size': 36px
+      - type: state-label
+        entity: sensor.bedroom_3_temperature
+        style:
+          left: 82.5%
+          top: 26.0%
+          font-size: 18px
+          font-weight: 600
+          color: var(--primary-text-color)
+      - type: state-icon
+        entity: light.landing
+        title: Landing
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+        style:
+          left: 66.7%
+          top: 55.2%
+          '--mdc-icon-size': 36px
+      - type: state-icon
+        entity: light.bedroom_1
+        title: Bedroom 1
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+        style:
+          left: 19.4%
+          top: 80.2%
+          '--mdc-icon-size': 36px
+      - type: state-label
+        entity: sensor.bedroom_1_temperature
+        style:
+          left: 47.2%
+          top: 80.2%
+          font-size: 18px
+          font-weight: 600
+          color: var(--primary-text-color)
+      - type: state-icon
+        entity: light.bathroom
+        title: Bathroom
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+        style:
+          left: 70.8%
+          top: 80.2%
+          '--mdc-icon-size': 36px
+      - type: state-label
+        entity: sensor.bathroom_temperature
+        style:
+          left: 86.7%
+          top: 80.2%
+          font-size: 18px
+          font-weight: 600
+          color: var(--primary-text-color)

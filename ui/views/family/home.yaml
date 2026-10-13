@@ -1,0 +1,167 @@
+# FAMILY HUB
+# Home View
+# The landing page of the wall tablet: time, who is home, weather,
+# today's agenda, chores, shopping list, and server health at a glance.
+
+title: Home
+icon: 'mdi:home-heart'
+path: home
+
+type: 'custom:grid-layout'
+layout:
+  margin: 0
+  card_margin: 8px
+  grid-template-columns: 1.3fr 1fr 1fr
+  grid-template-rows: auto auto 1fr
+  grid-template-areas: |
+    "nav nav nav"
+    "clock people weather"
+    "agenda chores lists"
+  mediaquery:
+    '(max-width: 1023.99px)':
+      grid-template-columns: 1fr 1fr
+      grid-template-areas: |
+        "nav nav"
+        "clock weather"
+        "people people"
+        "agenda chores"
+        "lists lists"
+    '(max-width: 599.99px)':
+      grid-template-columns: 1fr
+      grid-template-areas: |
+        "nav"
+        "clock"
+        "people"
+        "weather"
+        "agenda"
+        "chores"
+        "lists"
+
+cards:
+
+  # Navigation
+
+  - !include ../../shared/snippets/family-nav.yaml
+
+
+  # Clock + greeting
+  # now() makes the template re-render every minute.
+
+  - type: markdown
+    view_layout:
+      grid-area: clock
+    content: >-
+      {%- set h = now().hour -%}
+
+      ## {% if h >= 18 %}Good evening{% elif h >= 12 %}Good afternoon{% elif h >= 5 %}Good morning{% else %}Good night{% endif %}
+
+      # {{ now().strftime('%H:%M') }}
+
+      ### {{ now().strftime('%A %-d %B') }}
+    card_mod:
+      style: |
+        ha-card { background: none; box-shadow: none; }
+        h1 { font-size: 5rem; font-weight: 200; line-height: 1; margin: 0; }
+        h2 { font-weight: 400; opacity: .7; margin: 0 0 8px; }
+        h3 { font-weight: 400; margin: 8px 0 0; }
+
+
+  # Who's home
+  # One tile per person.* entity, so adding a person in
+  # Settings > People adds a tile here automatically.
+
+  - type: 'custom:auto-entities'
+    view_layout:
+      grid-area: people
+    card:
+      type: 'custom:layout-card'
+      layout_type: 'custom:grid-layout'
+      layout:
+        margin: 0
+        card_margin: 0
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr))
+        grid-gap: 8px
+    card_param: cards
+    filter:
+      include:
+        - domain: person
+          options:
+            type: 'custom:mushroom-person-card'
+            layout: vertical
+            primary_info: name
+            secondary_info: state
+            icon_type: entity-picture
+            tap_action:
+              action: more-info
+
+
+  # Weather
+  # Change weather.home to your weather entity.
+
+  - type: weather-forecast
+    view_layout:
+      grid-area: weather
+    entity: weather.home
+    forecast_type: daily
+    show_current: true
+    show_forecast: true
+
+
+  # Agenda
+  # Change calendar.family to your shared family calendar.
+
+  - type: calendar
+    view_layout:
+      grid-area: agenda
+    title: Coming up
+    initial_view: listWeek
+    entities:
+      - calendar.family
+
+
+  # Chores
+  # One checklist per todo.chores_* list (see FAMILY-HUB.md).
+
+  - type: vertical-stack
+    view_layout:
+      grid-area: chores
+    cards:
+      - type: 'custom:button-card'
+        template: family_title
+        name: Chores
+      - type: 'custom:auto-entities'
+        show_empty: false
+        card:
+          type: vertical-stack
+        card_param: cards
+        sort:
+          method: entity_id
+        filter:
+          include:
+            - entity_id: todo.chores_*
+              options:
+                type: todo-list
+
+
+  # Shopping list + server health
+
+  - type: vertical-stack
+    view_layout:
+      grid-area: lists
+    cards:
+      - type: 'custom:button-card'
+        template: family_title
+        name: Shopping
+      - type: todo-list
+        entity: todo.shopping_list
+      - type: 'custom:auto-entities'
+        show_empty: false
+        card:
+          type: glance
+          title: Server
+          show_state: true
+        filter:
+          include:
+            - entity_id: sensor.homeserver_cpu*
+            - entity_id: sensor.homeserver_memory*
+            - entity_id: sensor.homeserver_disk*

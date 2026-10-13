@@ -1,0 +1,73 @@
+# FAMILY HUB
+# Lists + Meals View
+# Shopping list, family to-do list, and the weekly meal plan.
+
+title: Lists
+icon: 'mdi:clipboard-list'
+path: lists
+
+type: 'custom:grid-layout'
+layout:
+  margin: 0
+  card_margin: 8px
+  grid-template-columns: 1fr 1fr 1fr
+  grid-template-areas: |
+    "nav nav nav"
+    "shopping todo meals"
+  mediaquery:
+    '(max-width: 1023.99px)':
+      grid-template-columns: 1fr 1fr
+      grid-template-areas: |
+        "nav nav"
+        "shopping todo"
+        "meals meals"
+    '(max-width: 599.99px)':
+      grid-template-columns: 1fr
+      grid-template-areas: |
+        "nav"
+        "shopping"
+        "todo"
+        "meals"
+
+cards:
+
+  - !include ../../shared/snippets/family-nav.yaml
+
+  # Built-in Shopping List integration.
+
+  - type: vertical-stack
+    view_layout:
+      grid-area: shopping
+    cards:
+      - type: 'custom:button-card'
+        template: family_title
+        name: Shopping
+      - type: todo-list
+        entity: todo.shopping_list
+
+  # A Local To-do list named "Family To-do".
+
+  - type: vertical-stack
+    view_layout:
+      grid-area: todo
+    cards:
+      - type: 'custom:button-card'
+        template: family_title
+        name: To-do
+      - type: todo-list
+        entity: todo.family_to_do
+
+  # A Local Calendar named "Meal Plan": add one all-day event per
+  # dinner, titled with the meal.
+
+  - type: vertical-stack
+    view_layout:
+      grid-area: meals
+    cards:
+      - type: 'custom:button-card'
+        template: family_title
+        name: Meals this week
+      - type: calendar
+        initial_view: listWeek
+        entities:
+          - calendar.meal_plan

@@ -1,6 +1,15 @@
 # MY LOVELACE DASHBOARDS
 # Made by Madelena Mak 2022
 
+# Family Hub (wall/kitchen tablet)
+ui-family:
+  require_admin: false
+  show_in_sidebar: true
+  icon: mdi:home-heart
+  title: Family Hub
+  filename: ui/ui-family.yaml
+  mode: yaml
+
 # Main Dashboard
 ui-dashboard:
   require_admin: false

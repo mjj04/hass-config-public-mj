@@ -30,6 +30,10 @@ It uses my own [Metrology theme](https://github.com/Madelena/Metrology-for-Hass)
 - [Tools Used](#tools-used)
 - [Credits](#credits)
 
+## The Family Hub
+
+A wall-tablet dashboard for the whole household: calendar, chores, who's home, lists and meals, a floor plan of the house, and Docker/server stats. See [FAMILY-HUB.md](FAMILY-HUB.md) for setup.
+
 ## The Maximalist Dashboard
 
 Contrary to conventional UX design, the dashboard is intentionally dense with information and not minimalist, because it is designed for only one power user: me.

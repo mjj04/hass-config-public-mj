@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -90 360 680">
+  <style>
+    polygon, rect { stroke: #8e949c; stroke-width: 3; stroke-linejoin: round; }
+    text { font-family: sans-serif; fill: #8e949c; text-anchor: middle; }
+    .n { font-size: 15px; font-weight: 700; }
+    .d { font-size: 11px; }
+  </style>
+
+  <!-- Garden (rear) -->
+  <rect x="20" y="-80" width="317" height="95" fill="rgba(76,175,80,.15)" stroke-dasharray="8 6"/>
+  <text class="n" x="180" y="-52">GARDEN</text>
+  <text class="d" x="180" y="-36">26.87 x 9.07 m</text>
+
+  <!-- Sitting / Dining Room -->
+  <polygon fill="rgba(142,148,156,.14)" points="20,15 198,15 198,305 275,305 275,450 248,450 248,560 20,560"/>
+  <text class="n" x="109" y="140">SITTING / DINING</text>
+  <text class="d" x="109" y="158">8.49 x 3.89 m</text>
+
+  <!-- Kitchen (with pantry cupboard) -->
+  <polygon fill="rgba(255,138,101,.16)" points="198,15 337,15 337,375 280,375 280,305 198,305"/>
+  <text class="n" x="268" y="100">KITCHEN</text>
+  <text class="d" x="268" y="118">4.24 x 2.06 m</text>
+
+  <!-- Stairs up -->
+  <polygon fill="rgba(142,148,156,.08)" points="280,385 337,385 337,450 280,450"/>
+  <text class="d" x="308" y="422">UP</text>
+
+  <!-- Hall -->
+  <polygon fill="rgba(142,148,156,.14)" points="248,450 337,450 337,560 248,560"/>
+  <text class="n" x="292" y="488">HALL</text>
+
+  <text class="d" x="180" y="582">FRONT</text>
+</svg>
