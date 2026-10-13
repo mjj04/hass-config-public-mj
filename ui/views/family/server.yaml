@@ -1,0 +1,92 @@
+# FAMILY HUB
+# Server View
+# Docker host stats for 192.168.86.27, from the Glances integration.
+# Entities are matched by pattern (sensor.homeserver_*), so they show
+# up as long as the Glances entry is named "homeserver".
+
+title: Server
+icon: 'mdi:server'
+path: server
+
+type: 'custom:grid-layout'
+layout:
+  margin: 0
+  card_margin: 8px
+  grid-template-columns: 1fr 2fr
+  grid-template-areas: |
+    "nav nav"
+    "stats glances"
+  mediaquery:
+    '(max-width: 1023.99px)':
+      grid-template-columns: 1fr
+      grid-template-areas: |
+        "nav"
+        "stats"
+        "glances"
+
+cards:
+
+  - !include ../../shared/snippets/family-nav.yaml
+
+
+  # Host resources and Docker containers.
+  # Any Glances sensor with "container" or "docker" in its id is
+  # listed under Containers, everything else under Host.
+
+  - type: vertical-stack
+    view_layout:
+      grid-area: stats
+    cards:
+      - type: 'custom:button-card'
+        template: family_title
+        name: Host
+      - type: 'custom:auto-entities'
+        show_empty: true
+        card:
+          type: entities
+          state_color: true
+        sort:
+          method: friendly_name
+        filter:
+          include:
+            - entity_id: sensor.homeserver_*
+          exclude:
+            - entity_id: '*container*'
+            - entity_id: '*docker*'
+        else:
+          type: markdown
+          content: >-
+            No `sensor.homeserver_*` entities found. Add the Glances
+            integration for 192.168.86.27 and name it **homeserver**
+            (see FAMILY-HUB.md).
+      - type: 'custom:button-card'
+        template: family_title
+        name: Containers
+      - type: 'custom:auto-entities'
+        show_empty: false
+        card:
+          type: entities
+          state_color: true
+        sort:
+          method: friendly_name
+        filter:
+          include:
+            - entity_id: '*homeserver*container*'
+            - entity_id: '*homeserver*docker*'
+
+
+  # Glances web UI, which also has the per-container table.
+  # Set family_server_glances_url in secrets.yaml, e.g.
+  # http://192.168.86.27:61208 (browsers block http iframes inside
+  # an https Home Assistant; use a reverse proxy or open it in a tab).
+
+  - type: vertical-stack
+    view_layout:
+      grid-area: glances
+    cards:
+      - type: 'custom:button-card'
+        template: family_title
+        name: Glances
+      - type: iframe
+        url: !secret family_server_glances_url
+        aspect_ratio: 75%

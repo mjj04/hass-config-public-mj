@@ -1,0 +1,49 @@
+# Family Hub navigation bar
+# Included at the top of every view as the "nav" grid area.
+# The kiosk-mode HACS plugin can hide the stock header so this bar
+# becomes the only navigation on the wall tablet.
+
+type: horizontal-stack
+cards:
+  - type: custom:button-card
+    template: family_nav
+    name: Home
+    icon: mdi:home-heart
+    tap_action:
+      action: navigate
+      navigation_path: /ui-family/home
+  - type: custom:button-card
+    template: family_nav
+    name: Calendar
+    icon: mdi:calendar-month
+    tap_action:
+      action: navigate
+      navigation_path: /ui-family/calendar
+  - type: custom:button-card
+    template: family_nav
+    name: Chores
+    icon: mdi:broom
+    tap_action:
+      action: navigate
+      navigation_path: /ui-family/chores
+  - type: custom:button-card
+    template: family_nav
+    name: Lists
+    icon: mdi:clipboard-list
+    tap_action:
+      action: navigate
+      navigation_path: /ui-family/lists
+  - type: custom:button-card
+    template: family_nav
+    name: House
+    icon: mdi:home-floor-g
+    tap_action:
+      action: navigate
+      navigation_path: /ui-family/house
+  - type: custom:button-card
+    template: family_nav
+    name: Server
+    icon: mdi:server
+    tap_action:
+      action: navigate
+      navigation_path: /ui-family/server

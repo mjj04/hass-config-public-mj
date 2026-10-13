@@ -1,0 +1,45 @@
+# FAMILY HUB
+# Calendar View
+# Month grid next to a week agenda.
+
+title: Calendar
+icon: 'mdi:calendar-month'
+path: calendar
+
+type: 'custom:grid-layout'
+layout:
+  margin: 0
+  card_margin: 8px
+  grid-template-columns: 2fr 1fr
+  grid-template-areas: |
+    "nav nav"
+    "month agenda"
+  mediaquery:
+    '(max-width: 1023.99px)':
+      grid-template-columns: 1fr
+      grid-template-areas: |
+        "nav"
+        "month"
+        "agenda"
+
+cards:
+
+  - !include ../../shared/snippets/family-nav.yaml
+
+  # Change calendar.family to your shared family calendar. Add more
+  # calendars (one per person, school, etc.) as extra list items, and
+  # each one gets its own color.
+
+  - type: calendar
+    view_layout:
+      grid-area: month
+    initial_view: dayGridMonth
+    entities:
+      - calendar.family
+
+  - type: calendar
+    view_layout:
+      grid-area: agenda
+    initial_view: listWeek
+    entities:
+      - calendar.family

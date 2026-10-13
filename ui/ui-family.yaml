@@ -1,0 +1,16 @@
+# Family Hub Dashboard
+# Wall/kitchen tablet dashboard for the whole household.
+# See FAMILY-HUB.md for setup.
+
+title: Family Hub
+
+views:
+  - !include views/family/home.yaml
+  - !include views/family/calendar.yaml
+  - !include views/family/chores.yaml
+  - !include views/family/lists.yaml
+  - !include views/family/house.yaml
+  - !include views/family/server.yaml
+
+decluttering_templates: !include templates/decluttering-card.yaml
+button_card_templates: !include_dir_merge_named templates/button-card/
