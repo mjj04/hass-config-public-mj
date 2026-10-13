@@ -15,14 +15,29 @@ No new HACS cards are needed beyond what `lovelace-resources.yaml` already loads
 
 ## Setup
 
-Register the dashboards file in `configuration.yaml` if you have not already:
+1. **Copy the files** into your Home Assistant config folder (`/config` on HA OS), without overwriting anything:
+   ```bash
+   git clone --depth 1 -b ccr-70269264-28l28e https://github.com/mjj04/hass-config-public-mj /tmp/hub
+   mkdir -p /config/ui /config/www && cp -rn /tmp/hub/ui/. /config/ui/ && cp -rn /tmp/hub/www/family /config/www/
+   ```
+   `www/family/` serves as `/local/family/`.
+2. **Install the frontend cards** from HACS: button-card, layout-card, auto-entities, mushroom and card-mod. If you manage resources by hand, `lovelace-resources.yaml` has the URLs.
+3. **Add `family_server_glances_url` to `secrets.yaml`** (see Server below). The dashboard will not load without it.
+4. **Register only this dashboard** in `configuration.yaml`. Do not include `lovelace-dashboards.yaml`, because it also registers the original personal dashboards.
+   ```yaml
+   lovelace:
+     dashboards:
+       ui-family:
+         mode: yaml
+         title: Family Hub
+         icon: mdi:home-heart
+         show_in_sidebar: true
+         filename: ui/ui-family.yaml
+   ```
+5. **Restart Home Assistant**, then open `/ui-family/home`. Later edits to the dashboard files only need a browser refresh.
+6. Create the entities below, or edit the placeholder ids in the views.
 
-```yaml
-lovelace:
-  dashboards: !include lovelace-dashboards.yaml
-```
-
-Copy `www/family/` into your config's `www/` folder (it serves as `/local/family/`).
+The House chores column on the Chores view uses the original chore setup (`config/chores.yaml`, `config/groups/chores.yaml` and their `input_*` helpers). If you have not installed those, delete that column.
 
 ### Entities to create or rename
 
