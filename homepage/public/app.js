@@ -251,6 +251,17 @@ function idleReturn(seconds) {
   reset();
 }
 
+// Big screens (a 4K TV at 100%) get the layout of a 1600px-wide screen,
+// zoomed up, so text and buttons stay readable from across the room.
+// homepage.yaml `scale:` overrides: a number, or 1 to turn it off.
+function fitScreen() {
+  const root = document.documentElement;
+  const auto = Math.max(1, Math.min(window.innerWidth / 1600, window.innerHeight / 900));
+  const scale = typeof config.scale === 'number' && config.scale > 0 ? config.scale : auto;
+  root.style.zoom = scale === 1 ? '' : String(scale);
+  root.style.setProperty('--app-h', `${window.innerHeight / scale}px`);
+}
+
 async function keepAwake() {
   try { await navigator.wakeLock?.request('screen'); } catch { /* needs https; ignore */ }
 }
@@ -266,6 +277,8 @@ async function boot() {
   if (config.theme === 'light' || config.theme === 'dark') document.documentElement.dataset.theme = config.theme;
   document.documentElement.lang = config.locale || 'en';
   document.getElementById('brand').textContent = config.title;
+  fitScreen();
+  addEventListener('resize', fitScreen);
   addEventListener('hashchange', renderPage);
   await renderPage();
   connect();

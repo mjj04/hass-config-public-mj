@@ -9,7 +9,7 @@ import YAML from 'yaml';
 
 // Only these top-level keys are sent to the browser. Everything else
 // (calendar URLs, server settings, API keys) stays on the server.
-const PUBLIC_KEYS = ['title', 'locale', 'timezone', 'theme', 'idle_return', 'people', 'rooms', 'pages'];
+const PUBLIC_KEYS = ['title', 'locale', 'timezone', 'theme', 'scale', 'idle_return', 'people', 'rooms', 'pages'];
 
 export async function ensureConfig(configDir, defaultsDir) {
   const file = path.join(configDir, 'homepage.yaml');

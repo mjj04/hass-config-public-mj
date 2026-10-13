@@ -20,10 +20,11 @@ To update later: `git pull && docker compose up -d --build`.
 
 Without Docker (Node 20+): `npm ci && npm start`. Docker stats then need `server.docker: unix:///var/run/docker.sock` and access to that socket.
 
-## Put it on the wall tablet
+## Screens
 
-- **Android:** [Fully Kiosk Browser](https://www.fully-kiosk.com/) pointed at the URL keeps the screen on and hides everything else. Chrome's "Add to Home screen" also opens it full screen.
-- **iPad:** Safari > Share > Add to Home Screen, then Guided Access to lock it.
+- **4K TV or monitor:** open the URL in a full-screen browser (F11, or a kiosk mode). Big screens are scaled up automatically, so a 4K screen at 100% gets the same layout as a 1600 × 900 one, just sharper. To change it, set `scale:` in `homepage.yaml`, for example `scale: 2`, or `scale: 1` to turn scaling off.
+- **Pixel and other Android phones:** open the URL in Chrome, then ⋮ > *Add to Home screen* > *Install*. It opens like an app, with the page tabs along the bottom.
+- **Wall tablet:** [Fully Kiosk Browser](https://www.fully-kiosk.com/) keeps the screen on and hides everything else. On an iPad, use Safari > Share > Add to Home Screen, then Guided Access to lock it.
 
 After `idle_return` seconds without a touch, the tablet goes back to the first page.
 

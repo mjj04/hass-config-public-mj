@@ -7,6 +7,7 @@ title: Our House
 locale: en-GB              # date and time style
 timezone: Europe/London
 theme: auto                # auto (follow the device), dark or light
+scale: auto                # auto scales 4K/large screens up; or a number, e.g. 2
 idle_return: 120           # seconds before the tablet goes back to the first page (0 = never)
 
 # Everyone in the house. id is used by chores; photo is optional
