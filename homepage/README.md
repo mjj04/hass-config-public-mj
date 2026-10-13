@@ -14,7 +14,7 @@ cd hass-config-public-mj/homepage
 docker compose up -d --build
 ```
 
-Open **http://192.168.86.27:8080**. On first start it creates `config/homepage.yaml` with an example setup. Edit that file and the screens reload by themselves.
+Open **http://192.168.86.27:9090**. On first start it creates `config/homepage.yaml` with an example setup. Edit that file and the screens reload by themselves.
 
 To update later: `git pull && docker compose up -d --build`.
 
@@ -216,7 +216,7 @@ Lists, chores, meals, notes, who's home and virtual device states are saved in `
 
 ## Security
 
-There is no login: anyone on your network can open the page, change the lists and switch devices. Don't forward port 8080 on your router. For access from outside, use a VPN such as Tailscale or WireGuard.
+There is no login: anyone on your network can open the page, change the lists and switch devices. Don't forward port 9090 on your router. For access from outside, use a VPN such as Tailscale or WireGuard.
 
 The Server page reads Docker through `docker-socket-proxy`, which only allows read-only container requests. The homepage never gets the Docker socket itself.
 
